@@ -1,0 +1,9 @@
+{
+  "name": "@metl/security-hunter",
+  "version": "1.0.0",
+  "description": "Metl Security Hunter - Python security scanning agent",
+  "scripts": {
+    "build": "docker build -t metl/security-hunter .",
+    "start": "python src/main.py"
+  }
+}

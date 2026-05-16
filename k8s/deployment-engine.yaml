@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-engine
+  namespace: metl-system
+  labels:
+    app: deployment-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deployment-engine
+  template:
+    metadata:
+      labels:
+        app: deployment-engine
+    spec:
+      serviceAccountName: metl-workload-identity
+      containers:
+        - name: deployment-engine
+          image: metl/deployment-engine:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: metl-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deployment-engine
+  namespace: metl-system
+spec:
+  selector:
+    app: deployment-engine
+  ports:
+    - port: 80
+      targetPort: 3000

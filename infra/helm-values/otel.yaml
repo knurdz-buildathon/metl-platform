@@ -1,0 +1,71 @@
+# OpenTelemetry Collector Helm values
+# metl-platform/infra/helm-values/otel.yaml
+
+mode: deployment
+
+config:
+  exporters:
+    prometheusremotewrite:
+      endpoint: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+      target_info:
+        enabled: true
+    otlp:
+      endpoint: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:4317
+      tls:
+        insecure: true
+    logging:
+      verbosity: detailed
+
+  processors:
+    batch:
+      timeout: 1s
+      send_batch_size: 1024
+    resource:
+      attributes:
+        - key: service.namespace
+          value: metl-system
+          action: upsert
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: 'metl-services'
+            kubernetes_sd_configs:
+              - role: pod
+                namespaces:
+                  names:
+                    - metl-system
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+
+  service:
+    pipelines:
+      metrics:
+        receivers: [otlp, prometheus]
+        processors: [batch, resource]
+        exporters: [prometheusremotewrite, logging]
+      traces:
+        receivers: [otlp]
+        processors: [batch, resource]
+        exporters: [otlp, logging]
+      logs:
+        receivers: [otlp]
+        processors: [batch, resource]
+        exporters: [logging]
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"

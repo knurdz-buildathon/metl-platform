@@ -1,0 +1,24 @@
+{
+  "name": "@metl/db",
+  "version": "1.0.0",
+  "description": "Prisma database client for Metl platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "prisma generate && tsc",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "@metl/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0",
+    "typescript": "^5.4.5",
+    "@types/node": "^20.0.0"
+  }
+}

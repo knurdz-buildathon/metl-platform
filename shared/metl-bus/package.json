@@ -1,0 +1,19 @@
+{
+  "name": "@metl/bus",
+  "version": "1.0.0",
+  "description": "NATS JetStream message bus wrapper for Metl platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "nats": "^2.26.0",
+    "@metl/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.0.0"
+  }
+}

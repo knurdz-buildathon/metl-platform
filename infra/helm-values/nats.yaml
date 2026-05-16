@@ -1,0 +1,74 @@
+# NATS Helm values with JetStream enabled
+# metl-platform/infra/helm-values/nats.yaml
+
+config:
+  cluster:
+    enabled: true
+    replicas: 3
+    name: metl-nats
+
+  jetstream:
+    enabled: true
+    fileStore:
+      dir: /data/jetstream
+      pvc:
+        enabled: true
+        size: 10Gi
+        storageClassName: managed-premium
+    memoryStore:
+      enabled: true
+      maxSize: 1Gi
+
+  nats:
+    port: 4222
+    tls:
+      enabled: false
+
+  websocket:
+    enabled: true
+    port: 8080
+    tls:
+      enabled: false
+
+  leafnodes:
+    enabled: false
+
+  mqtt:
+    enabled: false
+
+  gateway:
+    enabled: false
+
+monitor:
+  enabled: true
+  port: 8222
+  service:
+    enabled: true
+  podMonitor:
+    enabled: true
+
+service:
+  type: ClusterIP
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8222"
+    prometheus.io/path: "/varz"
+
+natsBox:
+  enabled: true
+ restartPolicy: Always
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+reloader:
+  enabled: true
+
+promExporter:
+  enabled: true
+  port: 7777

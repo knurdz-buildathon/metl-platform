@@ -1,0 +1,22 @@
+{
+  "name": "@metl/simple-vault",
+  "version": "1.0.0",
+  "description": "Metl Simple Vault - Lightweight AES secret service for dev/test",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
+    "@metl/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "tsx": "^4.10.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0"
+  }
+}

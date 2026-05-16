@@ -1,0 +1,231 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: metl
+      POSTGRES_PASSWORD: metl_password
+      POSTGRES_DB: metl
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metl"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: "--jetstream --http_port 8222"
+    volumes:
+      - nats_data:/data/jetstream
+
+  control-plane:
+    build: ./services/control-plane
+    ports:
+      - "3000:3000"
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+      - REDIS_HOST=redis
+      - PORT=3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  orchestration-agent:
+    build: ./services/orchestration-agent
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+    depends_on:
+      - nats
+      - postgres
+    volumes:
+      - ~/.kube/config:/root/.kube/config
+
+  resource-allocator:
+    build: ./services/resource-allocator
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+    depends_on:
+      - nats
+      - postgres
+
+  deployment-engine:
+    build: ./services/deployment-engine
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+      - BUILDS_DIR=/tmp/builds
+    depends_on:
+      - nats
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  sre-agent:
+    build: ./services/sre-agent
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+    depends_on:
+      - nats
+      - postgres
+
+  eco-mode:
+    build: ./services/eco-mode
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+    depends_on:
+      - nats
+      - postgres
+
+  ejection-agent:
+    build: ./services/ejection-agent
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+    depends_on:
+      - nats
+      - postgres
+
+  scaling-agent:
+    build: ./services/scaling-agent
+    environment:
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+    depends_on:
+      - nats
+      - postgres
+    volumes:
+      - ~/.kube/config:/root/.kube/config
+
+  vibe-coder:
+    build: ./agents/vibe-coder
+    ports:
+      - "8000:8000"
+    environment:
+      - NATS_URL=nats://nats:4222
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - AI_FOUNDRY_ENDPOINT_1=${AI_FOUNDRY_ENDPOINT_1}
+      - AI_FOUNDRY_KEY_1=${AI_FOUNDRY_KEY_1}
+      - AI_FOUNDRY_MODEL_1=${AI_FOUNDRY_MODEL_1:-gpt-4o}
+      - AI_FOUNDRY_ENDPOINT_2=${AI_FOUNDRY_ENDPOINT_2}
+      - AI_FOUNDRY_KEY_2=${AI_FOUNDRY_KEY_2}
+      - AI_FOUNDRY_MODEL_2=${AI_FOUNDRY_MODEL_2:-glm-4}
+      - AI_FOUNDRY_ENDPOINT_3=${AI_FOUNDRY_ENDPOINT_3}
+      - AI_FOUNDRY_KEY_3=${AI_FOUNDRY_KEY_3}
+      - AI_FOUNDRY_MODEL_3=${AI_FOUNDRY_MODEL_3:-kimi}
+      - AI_FOUNDRY_ENDPOINT_4=${AI_FOUNDRY_ENDPOINT_4}
+      - AI_FOUNDRY_KEY_4=${AI_FOUNDRY_KEY_4}
+      - AI_FOUNDRY_MODEL_4=${AI_FOUNDRY_MODEL_4:-deepseek-chat}
+      - AI_FOUNDRY_ENDPOINT_5=${AI_FOUNDRY_ENDPOINT_5}
+      - AI_FOUNDRY_KEY_5=${AI_FOUNDRY_KEY_5}
+      - AI_FOUNDRY_MODEL_5=${AI_FOUNDRY_MODEL_5:-grok}
+
+  vibe-coder-sdk:
+    build: ./agents/vibe-coder-sdk
+    environment:
+      - NODE_ENV=development
+      - NATS_URL=nats://nats:4222
+      - DATABASE_URL=postgresql://metl:metl_password@postgres:5432/metl
+      - CURSOR_API_KEY_1=${CURSOR_API_KEY_1}
+      - CURSOR_API_KEY_2=${CURSOR_API_KEY_2}
+      - CURSOR_API_KEY_3=${CURSOR_API_KEY_3}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - AI_FOUNDRY_ENDPOINT_1=${AI_FOUNDRY_ENDPOINT_1}
+      - AI_FOUNDRY_KEY_1=${AI_FOUNDRY_KEY_1}
+      - AI_FOUNDRY_MODEL_1=${AI_FOUNDRY_MODEL_1:-gpt-4o}
+      - AI_FOUNDRY_ENDPOINT_2=${AI_FOUNDRY_ENDPOINT_2}
+      - AI_FOUNDRY_KEY_2=${AI_FOUNDRY_KEY_2}
+      - AI_FOUNDRY_MODEL_2=${AI_FOUNDRY_MODEL_2:-glm-4}
+      - AI_FOUNDRY_ENDPOINT_3=${AI_FOUNDRY_ENDPOINT_3}
+      - AI_FOUNDRY_KEY_3=${AI_FOUNDRY_KEY_3}
+      - AI_FOUNDRY_MODEL_3=${AI_FOUNDRY_MODEL_3:-kimi}
+      - AI_FOUNDRY_ENDPOINT_4=${AI_FOUNDRY_ENDPOINT_4}
+      - AI_FOUNDRY_KEY_4=${AI_FOUNDRY_KEY_4}
+      - AI_FOUNDRY_MODEL_4=${AI_FOUNDRY_MODEL_4:-deepseek-chat}
+      - AI_FOUNDRY_ENDPOINT_5=${AI_FOUNDRY_ENDPOINT_5}
+      - AI_FOUNDRY_KEY_5=${AI_FOUNDRY_KEY_5}
+      - AI_FOUNDRY_MODEL_5=${AI_FOUNDRY_MODEL_5:-grok}
+    depends_on:
+      - nats
+      - postgres
+
+  security-hunter:
+    build: ./agents/security-hunter
+    environment:
+      - NATS_URL=nats://nats:4222
+      - SONARQUBE_URL=http://sonarqube:9000
+      - SONARQUBE_TOKEN=${SONARQUBE_TOKEN}
+
+  sonarqube:
+    image: sonarqube:10.4-community
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://postgres:5432/sonarqube
+      - SONAR_JDBC_USERNAME=metl
+      - SONAR_JDBC_PASSWORD=metl_password
+      - SONARQUBE_ADMIN_PASSWORD=${SONARQUBE_ADMIN_PASSWORD:-changeme}
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/api/system/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 300s
+
+  simple-vault:
+    build: ./services/simple-vault
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - VAULT_KEY=${VAULT_KEY:-changeme}
+
+volumes:
+  postgres_data:
+  redis_data:
+  nats_data:
+  sonarqube_data:
+  sonarqube_extensions:
+
+networks:
+  default:
+    name: metl-platform

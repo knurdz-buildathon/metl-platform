@@ -1,0 +1,24 @@
+{
+  "name": "@metl/eco-mode",
+  "version": "1.0.0",
+  "description": "Metl Eco-Mode Tracker - KEDA scale-to-zero and cost tracking",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@metl/bus": "workspace:*",
+    "@metl/db": "workspace:*",
+    "@metl/logger": "workspace:*",
+    "@metl/types": "workspace:*",
+    "@metl/k8s": "workspace:*",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "tsx": "^4.10.5",
+    "@types/node": "^20.0.0"
+  }
+}

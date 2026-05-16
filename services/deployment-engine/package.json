@@ -1,0 +1,25 @@
+{
+  "name": "@metl/deployment-engine",
+  "version": "1.0.0",
+  "description": "Metl Deployment Engine - BuildKit builds and ACR push",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@metl/bus": "workspace:*",
+    "@metl/db": "workspace:*",
+    "@metl/logger": "workspace:*",
+    "@metl/types": "workspace:*",
+    "@metl/k8s": "workspace:*",
+    "dotenv": "^16.4.5",
+    "simple-git": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "tsx": "^4.10.5",
+    "@types/node": "^20.0.0"
+  }
+}

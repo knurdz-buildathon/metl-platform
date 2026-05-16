@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestration-agent
+  namespace: metl-system
+  labels:
+    app: orchestration-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orchestration-agent
+  template:
+    metadata:
+      labels:
+        app: orchestration-agent
+    spec:
+      serviceAccountName: metl-workload-identity
+      containers:
+        - name: orchestration-agent
+          image: metl/orchestration-agent:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: metl-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestration-agent
+  namespace: metl-system
+spec:
+  selector:
+    app: orchestration-agent
+  ports:
+    - port: 80
+      targetPort: 3000

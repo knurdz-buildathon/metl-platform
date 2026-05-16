@@ -1,0 +1,120 @@
+# Traefik Helm values for Metl platform
+# metl-platform/infra/helm-values/traefik.yaml
+
+ports:
+  web:
+    port: 8000
+    expose: true
+    exposedPort: 80
+    protocol: TCP
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+        permanent: true
+
+  websecure:
+    port: 8443
+    expose: true
+    exposedPort: 443
+    protocol: TCP
+    tls:
+      enabled: true
+      certResolver: letsencrypt
+
+  metrics:
+    port: 9100
+    expose: false
+    protocol: TCP
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+
+  metrics:
+    address: ":9100"
+
+certResolvers:
+  letsencrypt:
+    email: admin@metl.run
+    storage: /tmp/acme.json
+    tlsChallenge: true
+    httpChallenge:
+      entryPoint: web
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+    format: json
+
+metrics:
+  prometheus:
+    enabled: true
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+
+providers:
+  kubernetesIngress:
+    enabled: true
+    publishedService:
+      enabled: true
+  kubernetesCRD:
+    enabled: true
+
+service:
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /ping
+
+deployment:
+  replicas: 2
+  kind: Deployment
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+ingressRoute:
+  dashboard:
+    enabled: false
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75

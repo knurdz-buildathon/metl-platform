@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sre-agent
+  namespace: metl-system
+  labels:
+    app: sre-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sre-agent
+  template:
+    metadata:
+      labels:
+        app: sre-agent
+    spec:
+      serviceAccountName: metl-workload-identity
+      containers:
+        - name: sre-agent
+          image: metl/sre-agent:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: metl-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sre-agent
+  namespace: metl-system
+spec:
+  selector:
+    app: sre-agent
+  ports:
+    - port: 80
+      targetPort: 3000

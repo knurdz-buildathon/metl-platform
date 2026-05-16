@@ -1,0 +1,20 @@
+{
+  "name": "@metl/k8s",
+  "version": "1.0.0",
+  "description": "Kubernetes API client helpers for Metl platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@kubernetes/client-node": "^0.21.0",
+    "@metl/logger": "workspace:*",
+    "@metl/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.0.0"
+  }
+}

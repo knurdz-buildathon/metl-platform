@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibe-coder
+  namespace: metl-system
+  labels:
+    app: vibe-coder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vibe-coder
+  template:
+    metadata:
+      labels:
+        app: vibe-coder
+    spec:
+      serviceAccountName: metl-workload-identity
+      containers:
+        - name: vibe-coder
+          image: metl/vibe-coder:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: metl-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vibe-coder
+  namespace: metl-system
+spec:
+  selector:
+    app: vibe-coder
+  ports:
+    - port: 80
+      targetPort: 3000

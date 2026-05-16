@@ -1,0 +1,27 @@
+{
+  "name": "@metl/cli",
+  "version": "1.0.0",
+  "description": "Metl CLI - Command line interface for the Metl platform",
+  "main": "dist/index.js",
+  "bin": {
+    "metl": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.0",
+    "inquirer": "^9.2.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "tsx": "^4.10.5",
+    "@types/node": "^20.0.0",
+    "@types/inquirer": "^9.0.0"
+  }
+}

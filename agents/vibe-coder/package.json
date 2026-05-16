@@ -1,0 +1,11 @@
+{
+  "name": "@metl/vibe-coder",
+  "version": "1.0.0",
+  "description": "Metl Vibe Coder - Python FastAPI + Gemini code generation agent",
+  "scripts": {
+    "build": "docker build -t metl/vibe-coder .",
+    "dev": "uvicorn main:app --reload --port 8000",
+    "start": "uvicorn main:app --host 0.0.0.0 --port 8000"
+  },
+  "dependencies": {}
+}

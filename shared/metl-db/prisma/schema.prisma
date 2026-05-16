@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  email       String
+  clusterTier String   @default("warm") @map("cluster_tier")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  providerMatrix ProviderMatrix?
+  deployments    Deployment[]
+  resources      Resource[]
+  incidents      Incident[]
+  tasks          Task[]
+
+  @@map("tenants")
+}
+
+model ProviderMatrix {
+  id     String @id @default(uuid())
+  tenantId String @unique @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  databaseMode String  @map("database_mode")
+  databaseConfig Json? @map("database_config")
+  
+  storageMode String @map("storage_mode")
+  storageConfig Json? @map("storage_config")
+  
+  mailMode String @map("mail_mode")
+  mailConfig Json? @map("mail_config")
+  
+  monitoringMode String @map("monitoring_mode")
+  monitoringConfig Json? @map("monitoring_config")
+  
+  authMode String @map("auth_mode")
+  authConfig Json? @map("auth_config")
+  
+  hostingMode String @map("hosting_mode")
+  hostingConfig Json? @map("hosting_config")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("provider_matrices")
+}
+
+model Deployment {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  name          String
+  slug          String
+  gitUrl        String   @map("git_url")
+  branch        String   @default("main")
+  status        String   @default("pending")
+  imageTag      String?  @map("image_tag")
+  containerPort Int      @default(3000) @map("container_port")
+  scalingTier   String   @default("warm") @map("scaling_tier")
+  memoryLimitMb Int      @default(512) @map("memory_limit_mb")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  resources Resource[]
+  tasks     Task[]
+  incidents Incident[]
+
+  @@unique([tenantId, slug])
+  @@map("deployments")
+}
+
+model Resource {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  deploymentId String?     @map("deployment_id")
+  deployment   Deployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+  
+  type     String
+  mode     String
+  status   String   @default("provisioning")
+  credentials Json?
+  endpoint String?
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("resources")
+}
+
+model Task {
+  id     String @id @default(uuid())
+  type   String
+  status String @default("pending")
+  
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  deploymentId String?     @map("deployment_id")
+  deployment   Deployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+  
+  payload Json
+  result  Json?
+  error   String?
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tasks")
+}
+
+model Incident {
+  id     String @id @default(uuid())
+  
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  deploymentId String?     @map("deployment_id")
+  deployment   Deployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+  
+  severity    String
+  category    String
+  message     String
+  source      String
+  resolvedAt  DateTime?   @map("resolved_at")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("incidents")
+}
+
+model ChatMessage {
+  id     String @id @default(uuid())
+  
+  tenantId String @map("tenant_id")
+  role     String
+  content  String
+  metadata Json?
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("chat_messages")
+}

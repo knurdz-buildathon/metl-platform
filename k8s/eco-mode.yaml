@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eco-mode
+  namespace: metl-system
+  labels:
+    app: eco-mode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eco-mode
+  template:
+    metadata:
+      labels:
+        app: eco-mode
+    spec:
+      serviceAccountName: metl-workload-identity
+      containers:
+        - name: eco-mode
+          image: metl/eco-mode:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: metl-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eco-mode
+  namespace: metl-system
+spec:
+  selector:
+    app: eco-mode
+  ports:
+    - port: 80
+      targetPort: 3000

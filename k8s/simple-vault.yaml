@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-vault
+  namespace: metl-system
+  labels:
+    app: simple-vault
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-vault
+  template:
+    metadata:
+      labels:
+        app: simple-vault
+    spec:
+      serviceAccountName: metl-workload-identity
+      containers:
+        - name: simple-vault
+          image: metl/simple-vault:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: metl-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-vault
+  namespace: metl-system
+spec:
+  selector:
+    app: simple-vault
+  ports:
+    - port: 80
+      targetPort: 3000

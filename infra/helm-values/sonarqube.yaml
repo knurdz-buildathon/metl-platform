@@ -1,0 +1,62 @@
+# SonarQube Helm values
+# metl-platform/infra/helm-values/sonarqube.yaml
+
+replicaCount: 1
+
+image:
+  repository: sonarqube
+  tag: 10.4.1-community
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 9000
+
+persistence:
+  enabled: true
+  storageClass: managed-premium
+  size: 10Gi
+
+postgresql:
+  enabled: true
+  postgresqlUsername: sonar
+  postgresqlPassword: sonar-password-change-me
+  postgresqlDatabase: sonarqube
+  persistence:
+    enabled: true
+    storageClass: managed-premium
+    size: 10Gi
+
+ingress:
+  enabled: true
+  hosts:
+    - name: sonar.metl.run
+      path: /
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+jvmOpts: "-XX:MaxRAMPercentage=70.0"
+
+plugins:
+  install:
+    - name: sonar-python
+    - name: sonar-javascript
+    - name: sonar-typescript
+    - name: sonar-java
+    - name: sonar-go
+    - name: sonar-php
+    - name: sonar-ruby
+
+monitoring:
+  prometheus:
+    enabled: true
+    exporter:
+      enabled: true
