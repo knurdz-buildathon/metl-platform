@@ -1,40 +1,36 @@
 # Metl Vibe Coder SDK — Cursor Cloud Agent Service
 # Builds from monorepo root to access workspace packages
 # docker compose context: metl-platform/ (repo root)
-# docker compose dockerfile: agents/vibe-coder-sdk/Dockerfile
 
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
-FROM base AS builder
 WORKDIR /app
 
-# Copy monorepo package.json (provides workspace definitions)
+# Install tini for proper process management
+RUN apk add --no-cache tini
+
+# Copy monorebo root files (workspaces definition)
 COPY package*.json ./
 
-# Copy ALL workspace packages needed (agents, services, shared)
-COPY shared/ shared/
-COPY agents/ agents/
+# Copy workspace packages this agent needs
+COPY shared/metl-bus/ shared/metl-bus/
+COPY shared/metl-db/ shared/metl-db/
+COPY shared/metl-logger/ shared/metl-logger/
+COPY shared/metl-types/ shared/metl-types/
 
-# Install and build with workspaces
-RUN npm install && npm run build --workspaces --if-present || true
+# Copy this agent's source
+COPY agents/vibe-coder-sdk/ agents/vibe-coder-sdk/
 
-# Prune to only production deps for this agent
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Install dependencies for the whole workspace, then build
+RUN npm install
+RUN npm run build --workspaces --if-present
+
+WORKDIR /app/agents/vibe-coder-sdk
+
 ENV NODE_ENV=production
 ENV PORT=3000
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 metl
-
-# Copy only what we need for runtime
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/agents/vibe-coder-sdk/dist ./dist
-COPY --from=builder /app/shared/*/dist ./shared/
-COPY --from=builder /app/agents/vibe-coder-sdk/package.json ./
-COPY --from=builder /app/package.json ./package-root.json
-
-USER metl
 EXPOSE 3000
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "dist/index.js"]
