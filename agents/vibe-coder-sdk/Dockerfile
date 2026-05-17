@@ -5,7 +5,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini openssl libc6-compat
 
 # Copy monorepo root files (workspaces definition)
 COPY package*.json ./
@@ -44,11 +44,15 @@ RUN echo "===== DEBUG: building metl-bus =====" && \
 RUN echo "===== DEBUG: building metl-db =====" && \
     cd shared/metl-db && npm run build || echo "db build had warnings"
 
-# region debug instrumentation [hypothesis: H11]
+# region debug instrumentation [hypothesis: H11, H13]
 RUN echo "===== DEBUG: Prisma client location after generate =====" && \
     echo "--- /app/node_modules/.prisma/client/ ---" && ls -la /app/node_modules/.prisma/client/ 2>&1 | head -20 && \
     echo "--- /app/node_modules/@prisma/client/ ---" && ls /app/node_modules/@prisma/client/ 2>&1 | head -10 && \
-    echo "--- /app/shared/metl-db/prisma/node_modules/ (should be empty/missing) ---" && ls /app/shared/metl-db/prisma/node_modules/ 2>&1 | head -5
+    echo "--- /app/shared/metl-db/prisma/node_modules/ (should be empty/missing) ---" && ls /app/shared/metl-db/prisma/node_modules/ 2>&1 | head -5 && \
+    echo "===== DEBUG: H13 — alpine openssl version + engine binaries =====" && \
+    apk info openssl 2>&1 | head -3 && \
+    ls /lib/libssl* /usr/lib/libssl* 2>&1 | head -10 && \
+    ls /app/node_modules/.prisma/client/*.so.node 2>&1 | head -10
 # endregion
 RUN echo "===== DEBUG: building vibe-coder-sdk =====" && \
     cd agents/vibe-coder-sdk && npm run build || echo "sdk build had warnings (likely API mismatch — runtime may still work)"
