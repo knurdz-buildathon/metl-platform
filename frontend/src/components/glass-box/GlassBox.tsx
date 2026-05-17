@@ -82,7 +82,7 @@ function TargetRunnerNode({ data }: NodeProps) {
     <div
       className={`px-3 py-2 rounded-lg border text-white text-xs transition-all duration-500 ${
         data.status === 'scaled_zero'
-          ? 'border-slate-600 bg-slate-800/40 opacity-40 grayscale'
+          ? 'border-border bg-accent/40 opacity-40 grayscale'
           : data.status === 'running'
           ? 'border-cyan-400 bg-cyan-900/80'
           : 'border-amber-500 bg-amber-900/80'
@@ -90,7 +90,7 @@ function TargetRunnerNode({ data }: NodeProps) {
       style={data.flash ? { animation: 'flashWhite 0.6s ease-in-out' } : undefined}
     >
       {data.label}
-      {data.slug && <span className="block text-[10px] text-slate-300 mt-0.5">{data.slug}</span>}
+      {data.slug && <span className="block text-[10px] text-foreground mt-0.5">{data.slug}</span>}
     </div>
   );
 }
@@ -379,18 +379,18 @@ export function GlassBox() {
 
   return (
     <div className="h-full relative">
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold">Glass Box Architecture</h2>
-          <p className="text-sm text-slate-400">Real-time view of your deployed infrastructure</p>
+          <p className="text-sm text-muted-foreground">Real-time view of your deployed infrastructure</p>
         </div>
         <div className="flex items-center gap-3">
           {recentEvent && (
-            <span className="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded">Last event: {recentEvent}</span>
+            <span className="text-xs text-muted-foreground bg-card px-2 py-1 rounded">Last event: {recentEvent}</span>
           )}
           <div className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${wsStatus === 'open' ? 'bg-green-500' : wsStatus === 'connecting' ? 'bg-amber-500 animate-pulse' : 'bg-red-500'}`} />
-            <span className="text-xs text-slate-400 uppercase tracking-wider">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">
               {wsStatus === 'open' ? 'Live' : wsStatus === 'connecting' ? 'Connecting' : 'Polling'}
             </span>
           </div>
@@ -416,7 +416,7 @@ export function GlassBox() {
             }}
             maskColor="rgba(15, 23, 42, 0.7)"
           />
-          <Panel position="bottom-left" className="text-[10px] text-slate-500 bg-slate-900/80 px-2 py-1 rounded">
+          <Panel position="bottom-left" className="text-[10px] text-muted-foreground bg-card/80 px-2 py-1 rounded">
             Monitoring: /api/visual-twin/state/{tenantId}
           </Panel>
         </ReactFlow>

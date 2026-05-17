@@ -43,7 +43,7 @@ export function DeploymentsList() {
       case 'error':
         return <XCircle className="w-4 h-4 text-red-400" />;
       default:
-        return <Clock className="w-4 h-4 text-slate-400" />;
+        return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -59,15 +59,15 @@ export function DeploymentsList() {
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-2">Deployments</h2>
-        <p className="text-slate-400">Manage your deployed applications</p>
+        <p className="text-muted-foreground">Manage your deployed applications</p>
       </div>
 
       <div className="grid gap-4">
         {deployments.length === 0 && (
-          <div className="p-8 text-center rounded-lg border border-slate-800 bg-slate-900">
-            <Rocket className="w-12 h-12 mx-auto mb-4 text-slate-600" />
+          <div className="p-8 text-center rounded-lg border border-border bg-card">
+            <Rocket className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-medium mb-1">No deployments yet</h3>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               Use the chat to create and deploy your first application
             </p>
           </div>
@@ -76,18 +76,18 @@ export function DeploymentsList() {
         {deployments.map((d) => (
           <div
             key={d.id}
-            className="flex items-center justify-between p-4 rounded-lg border border-slate-800 bg-slate-900"
+            className="flex items-center justify-between p-4 rounded-lg border border-border bg-card"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
                 <Rocket className="w-5 h-5 text-blue-400" />
               </div>
               <div>
                 <h3 className="font-medium">{d.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   {getStatusIcon(d.status)}
-                  <span className="text-sm text-slate-400 capitalize">{d.status}</span>
-                  <span className="text-slate-600">|</span>
+                  <span className="text-sm text-muted-foreground capitalize">{d.status}</span>
+                  <span className="text-muted-foreground">|</span>
                   <a
                     href={`https://${d.slug}.metl.run`}
                     target="_blank"
@@ -101,8 +101,8 @@ export function DeploymentsList() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors" title="View logs">
-                <Terminal className="w-4 h-4 text-slate-400" />
+              <button className="p-2 hover:bg-accent rounded-lg transition-colors" title="View logs">
+                <Terminal className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
           </div>

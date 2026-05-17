@@ -293,7 +293,7 @@ export function ProviderMatrix() {
     <div className="p-6 max-w-5xl mx-auto">
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-2">Provider Matrix</h2>
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Choose between Metl's self-hosted open-source services or bring your own keys
         </p>
       </div>
@@ -308,7 +308,7 @@ export function ProviderMatrix() {
           return (
             <div
               key={def.id}
-              className="rounded-lg border border-slate-800 bg-slate-900 hover:border-slate-700 transition-colors overflow-hidden"
+              className="rounded-lg border border-border bg-card hover:border-border transition-colors overflow-hidden"
             >
               {/* Header Row */}
               <div className="flex items-center justify-between p-4">
@@ -325,7 +325,7 @@ export function ProviderMatrix() {
                       <h3 className="font-medium">{def.label}</h3>
                       <StatusBadge mode={config.mode} />
                     </div>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       {isMetl ? def.metlLabel : `External ${config.provider?.replace('byok_', '').toUpperCase() || 'Provider'}`}
                     </p>
                   </div>
@@ -334,7 +334,7 @@ export function ProviderMatrix() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => toggleMode(def.id)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover:bg-slate-800"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover:bg-accent"
                   >
                     {isMetl ? (
                       <>
@@ -350,7 +350,7 @@ export function ProviderMatrix() {
                   </button>
                   <button
                     onClick={() => setExpanded(isExpanded ? null : def.id)}
-                    className="p-2 rounded-lg hover:bg-slate-800 text-slate-400"
+                    className="p-2 rounded-lg hover:bg-accent text-muted-foreground"
                   >
                     {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                   </button>
@@ -359,7 +359,7 @@ export function ProviderMatrix() {
 
               {/* Expandable Configuration Panel */}
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-slate-800">
+                <div className="px-4 pb-4 border-t border-border">
                   {isMetl ? (
                     <div className="pt-4 space-y-3">
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-600/5 border border-blue-600/10">
@@ -368,7 +368,7 @@ export function ProviderMatrix() {
                           <p className="text-sm font-medium text-blue-300">
                             {def.metlLabel} will be provisioned
                           </p>
-                          <p className="text-xs text-slate-400 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             Metl deploys an isolated, self-hosted open-source pod in your tenant's
                             K3s namespace. No external credentials needed.
                           </p>
@@ -379,7 +379,7 @@ export function ProviderMatrix() {
                     <div className="pt-4 space-y-4">
                       {/* Provider Selector */}
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                           External Provider
                         </label>
                         <select
@@ -387,7 +387,7 @@ export function ProviderMatrix() {
                           title="External Provider"
                           value={config.provider || ''}
                           onChange={(e) => updateField(def.id, 'provider', e.target.value)}
-                          className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                          className="w-full rounded-lg bg-background border border-border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/40"
                         >
                           {def.byokProviders.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -404,7 +404,7 @@ export function ProviderMatrix() {
                           const hasError = !!errors[errKey];
                           return (
                             <div key={fieldKey} className={fieldDef.type === 'password' ? 'md:col-span-1' : ''}>
-                              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                              <label className="block text-sm font-medium text-foreground mb-1.5">
                                 {fieldDef.label}
                                 {fieldDef.required && <span className="text-red-400 ml-0.5">*</span>}
                               </label>
@@ -413,10 +413,10 @@ export function ProviderMatrix() {
                                 value={config[fieldKey] || ''}
                                 onChange={(e) => updateField(def.id, fieldKey, e.target.value)}
                                 placeholder={fieldDef.placeholder}
-                                className={`w-full rounded-lg bg-slate-950 border px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 ${
+                                className={`w-full rounded-lg bg-background border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 ${
                                   hasError
                                     ? 'border-red-500 focus:ring-red-500/40'
-                                    : 'border-slate-700 focus:ring-amber-500/40'
+                                    : 'border-border focus:ring-amber-500/40'
                                 }`}
                               />
                               {hasError && (
@@ -458,13 +458,13 @@ export function ProviderMatrix() {
         })}
       </div>
 
-      <div className="mt-8 p-4 rounded-lg bg-slate-900 border border-slate-800">
-        <h4 className="font-medium text-slate-300 mb-2">How it works</h4>
-        <p className="text-sm text-slate-400 leading-relaxed">
+      <div className="mt-8 p-4 rounded-lg bg-card border border-border">
+        <h4 className="font-medium text-foreground mb-2">How it works</h4>
+        <p className="text-sm text-muted-foreground leading-relaxed">
           <strong className="text-blue-400">Metl Local</strong> deploys isolated open-source pods inside your tenant's
           K3s namespace (Supabase/PostgreSQL, MinIO, Listmonk, Keycloak, OpenTelemetry/SigNoz).
         </p>
-        <p className="text-sm text-slate-400 leading-relaxed mt-2">
+        <p className="text-sm text-muted-foreground leading-relaxed mt-2">
           <strong className="text-amber-400">Bring Your Own Keys</strong> lets you inject external provider credentials
           (AWS S3, Resend, Sentry, Clerk, Vercel, etc.). Your application code reads standardized environment variables
           so you can switch providers anytime with zero code changes.

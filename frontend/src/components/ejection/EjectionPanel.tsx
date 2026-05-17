@@ -63,7 +63,7 @@ export function EjectionPanel() {
     <div className="p-6 max-w-3xl mx-auto">
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-2">Ejection Engine</h2>
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Export your entire application stack with zero lock-in
         </p>
       </div>
@@ -80,20 +80,20 @@ export function EjectionPanel() {
         </div>
 
         <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="p-3 rounded-lg bg-slate-900/50">
+          <div className="p-3 rounded-lg bg-card/50">
             <FileArchive className="w-5 h-5 text-blue-400 mb-2" />
             <p className="text-xs font-medium">Helm Chart</p>
-            <p className="text-xs text-slate-500">K8s deployment package</p>
+            <p className="text-xs text-muted-foreground">K8s deployment package</p>
           </div>
-          <div className="p-3 rounded-lg bg-slate-900/50">
+          <div className="p-3 rounded-lg bg-card/50">
             <Container className="w-5 h-5 text-green-400 mb-2" />
             <p className="text-xs font-medium">Docker Compose</p>
-            <p className="text-xs text-slate-500">Standalone deployment</p>
+            <p className="text-xs text-muted-foreground">Standalone deployment</p>
           </div>
-          <div className="p-3 rounded-lg bg-slate-900/50">
+          <div className="p-3 rounded-lg bg-card/50">
             <Database className="w-5 h-5 text-purple-400 mb-2" />
             <p className="text-xs font-medium">Schema Export</p>
-            <p className="text-xs text-slate-500">PostgreSQL migration</p>
+            <p className="text-xs text-muted-foreground">PostgreSQL migration</p>
           </div>
         </div>
       </div>
@@ -134,7 +134,7 @@ export function EjectionPanel() {
 
       <div className="mt-8 space-y-3">
         <h4 className="font-medium text-sm">What gets exported</h4>
-        <ul className="space-y-2 text-sm text-slate-400">
+        <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-center gap-2">
             <CheckIcon /> Complete application source code
           </li>

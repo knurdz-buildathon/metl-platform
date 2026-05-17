@@ -64,7 +64,7 @@ export function IncidentsPanel() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold mb-2">Incidents</h2>
-          <p className="text-slate-400">Real-time alerts from the SRE monitoring system</p>
+          <p className="text-muted-foreground">Real-time alerts from the SRE monitoring system</p>
         </div>
         <div className="flex gap-2">
           {['all', 'active', 'critical', 'warning'].map((f) => (
@@ -74,7 +74,7 @@ export function IncidentsPanel() {
               className={`px-3 py-1 rounded-lg text-sm capitalize transition-colors ${
                 filter === f
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  : 'bg-accent text-muted-foreground hover:bg-accent'
               }`}
             >
               {f}
@@ -85,10 +85,10 @@ export function IncidentsPanel() {
 
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="p-8 text-center rounded-lg border border-slate-800 bg-slate-900">
+          <div className="p-8 text-center rounded-lg border border-border bg-card">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-600" />
             <h3 className="text-lg font-medium">All clear</h3>
-            <p className="text-sm text-slate-400">No incidents to report</p>
+            <p className="text-sm text-muted-foreground">No incidents to report</p>
           </div>
         )}
 
@@ -97,7 +97,7 @@ export function IncidentsPanel() {
             key={incident.id}
             className={`p-4 rounded-lg border ${
               incident.resolvedAt
-                ? 'border-slate-800 bg-slate-900/50 opacity-60'
+                ? 'border-border bg-card/50 opacity-60'
                 : incident.severity === 'critical'
                 ? 'border-red-900/50 bg-red-900/10'
                 : 'border-amber-900/50 bg-amber-900/10'
@@ -109,10 +109,10 @@ export function IncidentsPanel() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{incident.category}</span>
-                    <span className="text-xs text-slate-500">{incident.source}</span>
+                    <span className="text-xs text-muted-foreground">{incident.source}</span>
                   </div>
-                  <p className="text-sm text-slate-300 mt-1">{incident.message}</p>
-                  <p className="text-xs text-slate-500 mt-2">
+                  <p className="text-sm text-foreground mt-1">{incident.message}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
                     {new Date(incident.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -121,10 +121,10 @@ export function IncidentsPanel() {
               {!incident.resolvedAt && (
                 <button
                   onClick={() => resolveIncident(incident.id)}
-                  className="p-1 hover:bg-slate-800 rounded transition-colors"
+                  className="p-1 hover:bg-accent rounded transition-colors"
                   title="Resolve"
                 >
-                  <X className="w-4 h-4 text-slate-400" />
+                  <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               )}
             </div>
