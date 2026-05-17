@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - "docs/**"
   pull_request:
     branches: [main]
 
@@ -130,7 +130,7 @@ jobs:
             docker-compose -f docker-compose.app.yml up -d --remove-orphans
             echo "=== Health checks ==="
             sleep 5
-            curl -sf http://localhost:3001/api/health || echo "WARNING: Control-plane health check failed"
+            curl -sf http://https://metl.run/api/health || echo "WARNING: Control-plane health check failed"
             echo "=== Cleanup ==="
             docker image prune -af --filter "until=168h"
             docker system prune -af --filter "until=168h" || true

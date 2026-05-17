@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const INTERNAL_VAULT_URL = process.env.INTERNAL_VAULT_URL || "http://simple-vault:3002";
+const CONTROL_PLANE_URL = process.env.CONTROL_PLANE_URL || "http://control-plane:3001";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -12,7 +13,7 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: "/api/:path*",
-          destination: "http://control-plane:3001/api/:path*",
+          destination: `${CONTROL_PLANE_URL}/api/:path*`,
         },
       ],
       afterFiles: [

@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 import { createServer } from 'node:http';
 import { initTelemetry, logger, shutdownTelemetry } from '@metl/logger';
 import { bus } from '@metl/bus';
@@ -15,6 +17,11 @@ import { incidentsRouter } from './routes/incidents';
 import { alertsRouter } from './routes/alerts';
 import { visualTwinRouter } from './routes/visual-twin';
 import { attachWebSocket } from './routes/ws';
+import { authRouter } from './routes/auth';
+import { billingRouter } from './routes/billing';
+import { dodoWebhookRouter } from './routes/webhooks/dodo';
+
+dotenv.config();
 initTelemetry();
 
 const app = express();
@@ -22,8 +29,18 @@ const server = createServer(app);
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
+
+// Auth routes (public)
+app.use('/api/auth', authRouter);
+
+// Webhooks (public, signature-verified internally)
+app.use('/api/webhooks/dodo', dodoWebhookRouter);
+
+// Billing routes (auth required inside router)
+app.use('/api/billing', billingRouter);
 
 // Health check
 app.get('/health', async (_req, res) => {
@@ -33,7 +50,7 @@ app.get('/health', async (_req, res) => {
   res.json({ status: dbHealthy ? 'ok' : 'degraded', service: 'control-plane' });
 });
 
-// API routes
+// API routes — all existing routes remain functional
 app.use('/api/chat', chatRouter);
 app.use('/api/deployments', deploymentsRouter);
 app.use('/api/provider', providerRouter);

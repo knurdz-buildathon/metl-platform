@@ -14,6 +14,12 @@ model Tenant {
   slug        String   @unique
   email       String
   clusterTier String   @default("warm") @map("cluster_tier")
+  plan        String   @default("free") @map("plan")
+  maxProjects Int      @default(1) @map("max_projects")
+  maxMemoryMb Int      @default(512) @map("max_memory_mb")
+  allowEjection       Boolean @default(false) @map("allow_ejection")
+  allowAdvancedGlassBox Boolean @default(false) @map("allow_advanced_glassbox")
+  allowMeteredBilling Boolean @default(false) @map("allow_metered_billing")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -22,6 +28,9 @@ model Tenant {
   resources      Resource[]
   incidents      Incident[]
   tasks          Task[]
+  users          User[]
+  subscriptions  Subscription[]
+  usageEvents    UsageEvent[]
 
   @@map("tenants")
 }
@@ -152,4 +161,73 @@ model ChatMessage {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("chat_messages")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  name          String?
+  avatarUrl     String?   @map("avatar_url")
+  passwordHash  String?   @map("password_hash")
+  googleId      String?   @unique @map("google_id")
+  githubId      String?   @unique @map("github_id")
+  role          String    @default("user")
+  tenantId      String    @map("tenant_id")
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId            String    @map("tenant_id")
+  tenant              Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  dodoCustomerId      String?   @map("dodo_customer_id")
+  dodoSubscriptionId  String?   @unique @map("dodo_subscription_id")
+  plan                String    @default("free")
+  status              String    @default("active")
+  currentPeriodEnd    DateTime? @map("current_period_end")
+  cancelAtPeriodEnd   Boolean   @default(false) @map("cancel_at_period_end")
+  canceledAt          DateTime? @map("canceled_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
+}
+
+model UsageEvent {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eventType   String   @map("event_type")
+  eventName   String   @map("event_name")
+  quantity    Int      @default(1)
+  metadata    Json?
+  syncedToDodo Boolean @default(false) @map("synced_to_dodo")
+  dodoEventId String?  @map("dodo_event_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId, eventName, createdAt])
+  @@map("usage_events")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("password_reset_tokens")
 }

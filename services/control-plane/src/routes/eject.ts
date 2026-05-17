@@ -2,15 +2,20 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '@metl/db';
 import { bus } from '@metl/bus';
 import { logger } from '@metl/logger';
+import { requireAuth } from '../middleware/auth';
+import { planGate } from '../middleware/plan-gate';
 import fs from 'fs';
 import path from 'path';
 
 const router = Router();
 
+// All ejection routes require Pro or Plus plan
+router.use(requireAuth, planGate('pro'));
+
 // POST /api/eject/:tenantId
 router.post('/:tenantId', async (req: Request, res: Response) => {
   try {
-    const { tenantId } = req.params;
+    const tenantId = req.user!.tenantId;
 
     const deployment = await prisma.deployment.findFirst({
       where: { tenantId },
