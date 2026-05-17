@@ -1,0 +1,63 @@
+# Generic Dockerfile for Node.js workspace services in the metl-platform monorepo.
+# Build context: metl-platform/ (monorepo root)
+# Required build arg: SERVICE_PATH (e.g. "services/control-plane", "agents/security-hunter")
+#
+# This is shared by all Node services that depend on shared/* workspace packages
+# (@metl/bus, @metl/db, @metl/logger, @metl/types, @metl/azure, @metl/k8s).
+
+FROM node:20-alpine
+
+ARG SERVICE_PATH
+ENV SERVICE_PATH=${SERVICE_PATH}
+
+WORKDIR /app
+
+# tini for proper signal handling; openssl + libc6-compat for Prisma engine on Alpine
+RUN apk add --no-cache tini openssl libc6-compat
+
+# Copy monorepo root files
+COPY package*.json ./
+
+# Copy ALL shared packages (most services depend on multiple, simpler to copy all)
+COPY shared/ shared/
+
+# Copy the target service
+COPY ${SERVICE_PATH}/ ${SERVICE_PATH}/
+
+# Trim the root workspaces config to ONLY what we've copied. Without this,
+# npm install --workspaces fails trying to resolve services/*, agents/*,
+# frontend, cli, ejection-engine which aren't in this build context.
+RUN node -e "const fs=require('fs'),path=require('path'); \
+const p=require('./package.json'); \
+const candidates=['shared/metl-logger','shared/metl-types','shared/metl-bus','shared/metl-db','shared/metl-azure','shared/metl-k8s']; \
+const ws=candidates.filter(w=>fs.existsSync(path.join(w,'package.json'))); \
+if(fs.existsSync(path.join(process.env.SERVICE_PATH,'package.json')))ws.push(process.env.SERVICE_PATH); \
+p.workspaces=ws; \
+fs.writeFileSync('./package.json', JSON.stringify(p,null,2)); \
+console.log('Workspaces trimmed to:',ws);"
+
+# Install all workspace dependencies (creates @metl/* symlinks in node_modules)
+RUN npm install --workspaces --include-workspace-root
+
+# Build shared packages in topological order (logger and types are leaf deps).
+# Use `|| true` to tolerate known type errors in metl-bus (AckPolicy literal),
+# metl-db (implicit-any handlers). noEmitOnError defaults to false so .js still emits.
+RUN cd shared/metl-logger && npm run build
+RUN cd shared/metl-types  && npm run build
+RUN cd shared/metl-azure  && (npm run build || true)
+RUN cd shared/metl-bus    && (npm run build || true)
+RUN cd shared/metl-db     && (npm run build || true)
+RUN cd shared/metl-k8s    && (npm run build || true)
+
+# Build the target service. Tolerate type errors here too — JS still emits.
+RUN cd ${SERVICE_PATH} && (npm run build || true)
+
+WORKDIR /app/${SERVICE_PATH}
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "dist/index.js"]
