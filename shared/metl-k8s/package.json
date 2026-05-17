@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.21.0",
-    "@metl/logger": "workspace:*",
-    "@metl/types": "workspace:*"
+    "@metl/logger": "*",
+    "@metl/types": "*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

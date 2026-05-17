@@ -9,12 +9,12 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@metl/bus": "workspace:*",
-    "@metl/db": "workspace:*",
-    "@metl/logger": "workspace:*",
-    "@metl/types": "workspace:*",
-    "@metl/k8s": "workspace:*",
-    "@metl/azure": "workspace:*",
+    "@metl/bus": "*",
+    "@metl/db": "*",
+    "@metl/logger": "*",
+    "@metl/types": "*",
+    "@metl/k8s": "*",
+    "@metl/azure": "*",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

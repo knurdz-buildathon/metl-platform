@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@cursor/sdk": "^0.1.0",
-    "@metl/bus": "workspace:*",
-    "@metl/db": "workspace:*",
-    "@metl/logger": "workspace:*",
-    "@metl/types": "workspace:*",
+    "@metl/bus": "*",
+    "@metl/db": "*",
+    "@metl/logger": "*",
+    "@metl/types": "*",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

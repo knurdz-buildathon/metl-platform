@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
-    "@metl/logger": "workspace:*"
+    "@metl/logger": "*"
   },
   "devDependencies": {
     "prisma": "^5.14.0",

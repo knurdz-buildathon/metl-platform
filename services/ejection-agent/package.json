@@ -9,10 +9,10 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@metl/bus": "workspace:*",
-    "@metl/db": "workspace:*",
-    "@metl/logger": "workspace:*",
-    "@metl/ejection-engine": "workspace:*",
+    "@metl/bus": "*",
+    "@metl/db": "*",
+    "@metl/logger": "*",
+    "@metl/ejection-engine": "*",
     "dotenv": "^16.4.5",
     "archiver": "^7.0.0"
   },

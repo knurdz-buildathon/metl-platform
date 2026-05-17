@@ -16,7 +16,7 @@
     "@azure/arm-rediscache": "^8.1.0",
     "ioredis": "^5.4.0",
     "pg": "^8.11.0",
-    "@metl/logger": "workspace:*"
+    "@metl/logger": "*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

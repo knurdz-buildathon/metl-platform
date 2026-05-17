@@ -18,12 +18,12 @@
     "express-validator": "^7.1.0",
     "openai": "^4.47.0",
     "@cursor/sdk": "^0.1.0",
-    "@metl/bus": "workspace:*",
-    "@metl/db": "workspace:*",
-    "@metl/logger": "workspace:*",
-    "@metl/types": "workspace:*",
-    "@metl/azure": "workspace:*",
-    "@metl/k8s": "workspace:*"
+    "@metl/bus": "*",
+    "@metl/db": "*",
+    "@metl/logger": "*",
+    "@metl/types": "*",
+    "@metl/azure": "*",
+    "@metl/k8s": "*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

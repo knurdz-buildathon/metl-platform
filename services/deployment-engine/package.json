@@ -9,11 +9,11 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@metl/bus": "workspace:*",
-    "@metl/db": "workspace:*",
-    "@metl/logger": "workspace:*",
-    "@metl/types": "workspace:*",
-    "@metl/k8s": "workspace:*",
+    "@metl/bus": "*",
+    "@metl/db": "*",
+    "@metl/logger": "*",
+    "@metl/types": "*",
+    "@metl/k8s": "*",
     "dotenv": "^16.4.5",
     "simple-git": "^3.24.0"
   },

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "nats": "^2.26.0",
-    "@metl/logger": "workspace:*"
+    "@metl/logger": "*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
