@@ -10,6 +10,7 @@ import sys
 from typing import Any
 
 import nats
+import nats.errors
 from nats.js.api import ConsumerConfig
 
 from ai_client import generate, AiResult
@@ -94,7 +95,10 @@ async def main() -> None:
 
     try:
         while True:
-            msgs = await sub.fetch(batch=1, timeout=5)
+            try:
+                msgs = await sub.fetch(batch=1, timeout=5)
+            except (nats.errors.TimeoutError, asyncio.TimeoutError):
+                continue
             for msg in msgs:
                 try:
                     data = json.loads(msg.data.decode("utf-8"))

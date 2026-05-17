@@ -43,6 +43,13 @@ RUN echo "===== DEBUG: building metl-bus =====" && \
     cd shared/metl-bus && npm run build || echo "bus build had warnings"
 RUN echo "===== DEBUG: building metl-db =====" && \
     cd shared/metl-db && npm run build || echo "db build had warnings"
+
+# region debug instrumentation [hypothesis: H11]
+RUN echo "===== DEBUG: Prisma client location after generate =====" && \
+    echo "--- /app/node_modules/.prisma/client/ ---" && ls -la /app/node_modules/.prisma/client/ 2>&1 | head -20 && \
+    echo "--- /app/node_modules/@prisma/client/ ---" && ls /app/node_modules/@prisma/client/ 2>&1 | head -10 && \
+    echo "--- /app/shared/metl-db/prisma/node_modules/ (should be empty/missing) ---" && ls /app/shared/metl-db/prisma/node_modules/ 2>&1 | head -5
+# endregion
 RUN echo "===== DEBUG: building vibe-coder-sdk =====" && \
     cd agents/vibe-coder-sdk && npm run build || echo "sdk build had warnings (likely API mismatch — runtime may still work)"
 # endregion
