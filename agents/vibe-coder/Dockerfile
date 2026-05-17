@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir fastapi uvicorn google-generativeai pydantic openai requests nats-py
 
-COPY src/ .
+COPY agents/vibe-coder/src/ .
 
 EXPOSE 8000
 
