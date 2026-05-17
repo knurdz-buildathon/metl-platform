@@ -60,6 +60,15 @@ RUN if [ -d ejection-engine ] && [ -f ejection-engine/package.json ]; then \
 # Build the target service. Tolerate type errors here too — JS still emits.
 RUN cd ${SERVICE_PATH} && (npm run build || true)
 
+# region debug instrumentation [hypothesis: H14] — verify dist/index.js was emitted
+RUN if [ ! -f "/app/${SERVICE_PATH}/dist/index.js" ]; then \
+        echo "FATAL: /app/${SERVICE_PATH}/dist/index.js was NOT emitted by tsc."; \
+        echo "Has tsconfig.json? $(test -f /app/${SERVICE_PATH}/tsconfig.json && echo YES || echo NO)"; \
+        echo "Contents of /app/${SERVICE_PATH}/:"; ls -la /app/${SERVICE_PATH}/; \
+        exit 1; \
+    fi
+# endregion
+
 WORKDIR /app/${SERVICE_PATH}
 
 ENV NODE_ENV=production
