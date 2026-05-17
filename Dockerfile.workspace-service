@@ -21,15 +21,18 @@ COPY package*.json ./
 # Copy ALL shared packages (most services depend on multiple, simpler to copy all)
 COPY shared/ shared/
 
+# Copy ejection-engine — a top-level workspace package depended on by services/ejection-agent
+COPY ejection-engine/ ejection-engine/
+
 # Copy the target service
 COPY ${SERVICE_PATH}/ ${SERVICE_PATH}/
 
 # Trim the root workspaces config to ONLY what we've copied. Without this,
 # npm install --workspaces fails trying to resolve services/*, agents/*,
-# frontend, cli, ejection-engine which aren't in this build context.
+# frontend, cli which aren't in this build context.
 RUN node -e "const fs=require('fs'),path=require('path'); \
 const p=require('./package.json'); \
-const candidates=['shared/metl-logger','shared/metl-types','shared/metl-bus','shared/metl-db','shared/metl-azure','shared/metl-k8s']; \
+const candidates=['shared/metl-logger','shared/metl-types','shared/metl-bus','shared/metl-db','shared/metl-azure','shared/metl-k8s','ejection-engine']; \
 const ws=candidates.filter(w=>fs.existsSync(path.join(w,'package.json'))); \
 if(fs.existsSync(path.join(process.env.SERVICE_PATH,'package.json')))ws.push(process.env.SERVICE_PATH); \
 p.workspaces=ws; \
@@ -48,6 +51,11 @@ RUN cd shared/metl-azure  && (npm run build || true)
 RUN cd shared/metl-bus    && (npm run build || true)
 RUN cd shared/metl-db     && (npm run build || true)
 RUN cd shared/metl-k8s    && (npm run build || true)
+# ejection-engine depends on the shared packages above, so it builds after them.
+# Only build if it's still listed as a workspace (skipped when service doesn't need it).
+RUN if [ -d ejection-engine ] && [ -f ejection-engine/package.json ]; then \
+        cd ejection-engine && (npm run build || true); \
+    fi
 
 # Build the target service. Tolerate type errors here too — JS still emits.
 RUN cd ${SERVICE_PATH} && (npm run build || true)
