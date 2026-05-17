@@ -14,7 +14,8 @@
     "@metl/db": "*",
     "@metl/logger": "*",
     "@metl/types": "*",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "openai": "^4.68.0"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
