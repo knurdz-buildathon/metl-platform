@@ -3,8 +3,12 @@ import { body, param, validationResult } from 'express-validator';
 import { prisma } from '@metl/db';
 import { bus } from '@metl/bus';
 import { logger } from '@metl/logger';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
+
+// All deployment routes require authentication
+router.use(requireAuth);
 
 function handleValidation(req: Request, res: Response, next: () => void): void {
   const errors = validationResult(req);
@@ -24,9 +28,9 @@ function handleValidation(req: Request, res: Response, next: () => void): void {
 // GET /api/deployments
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { tenantId } = req.query;
+    const tenantId = req.user!.tenantId;
     const deployments = await prisma.deployment.findMany({
-      where: tenantId ? { tenantId: String(tenantId) } : undefined,
+      where: { tenantId },
       orderBy: { createdAt: 'desc' },
     });
     res.json({ deployments });
@@ -43,7 +47,7 @@ router.get('/:id', param('id').isUUID().withMessage('id must be a valid UUID'), 
       where: { id: req.params.id },
       include: { resources: true },
     });
-    if (!deployment) {
+    if (!deployment || deployment.tenantId !== req.user!.tenantId) {
       res.status(404).json({ error: { code: 'ERR_NOT_FOUND', message: 'Deployment not found', details: null } });
       return;
     }
@@ -60,7 +64,6 @@ router.get('/:id', param('id').isUUID().withMessage('id must be a valid UUID'), 
 router.post(
   '/',
   [
-    body('tenantId').isUUID().withMessage('tenantId must be a valid UUID'),
     body('name').trim().isLength({ min: 1, max: 100 }).withMessage('name is required (1-100 chars)'),
     body('slug').trim().matches(/^[a-z0-9-]+$/).withMessage('slug must be lowercase alphanumeric with hyphens'),
     body('gitUrl').isURL().withMessage('gitUrl must be a valid URL'),
@@ -71,7 +74,32 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     try {
-      const { tenantId, name, slug, gitUrl, branch = 'main', scalingTier = 'warm', memoryLimitMb = 512 } = req.body;
+      const tenantId = req.user!.tenantId;
+      const { name, slug, gitUrl, branch = 'main', scalingTier = 'warm', memoryLimitMb = 512 } = req.body;
+
+      // Enforce plan limits: max projects
+      const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+      if (!tenant) {
+        res.status(404).json({ error: { code: 'ERR_TENANT_NOT_FOUND', message: 'Tenant not found', details: null } });
+        return;
+      }
+      if (tenant.maxProjects > 0) {
+        const existingCount = await prisma.deployment.count({ where: { tenantId } });
+        if (existingCount >= tenant.maxProjects) {
+          res.status(403).json({
+            error: { code: 'ERR_PROJECT_LIMIT', message: `Project limit reached (${tenant.maxProjects}). Upgrade your plan for more.`, details: null },
+          });
+          return;
+        }
+      }
+
+      // Enforce plan limits: max memory
+      if (tenant.maxMemoryMb > 0 && memoryLimitMb > tenant.maxMemoryMb) {
+        res.status(403).json({
+          error: { code: 'ERR_MEMORY_LIMIT', message: `Memory limit exceeded. Max allowed: ${tenant.maxMemoryMb} MB.`, details: null },
+        });
+        return;
+      }
 
       const deployment = await prisma.deployment.create({
         data: {
@@ -93,6 +121,19 @@ router.post(
         payload: { gitUrl, branch, slug, deploymentId: deployment.id, scalingTier, memoryLimitMb },
       });
 
+      // Track usage for metered billing (Plus plan only)
+      if (tenant.allowMeteredBilling) {
+        await prisma.usageEvent.create({
+          data: {
+            tenantId,
+            eventType: 'deployment',
+            eventName: 'deployment.created',
+            quantity: 1,
+            metadata: { deploymentId: deployment.id, memoryLimitMb },
+          },
+        });
+      }
+
       res.status(201).json({ deployment });
     } catch (err: any) {
       logger.error({ err }, 'Failed to create deployment');
@@ -113,7 +154,7 @@ router.delete('/:id', param('id').isUUID().withMessage('id must be a valid UUID'
     const deployment = await prisma.deployment.findUnique({
       where: { id: req.params.id },
     });
-    if (!deployment) {
+    if (!deployment || deployment.tenantId !== req.user!.tenantId) {
       res.status(404).json({ error: { code: 'ERR_NOT_FOUND', message: 'Deployment not found', details: null } });
       return;
     }
